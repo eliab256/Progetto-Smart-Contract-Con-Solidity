@@ -4,7 +4,27 @@
 	},
 	"language": "Solidity",
 	"output": {
-		"abi": [],
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "usersBalances",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
 		"devdoc": {
 			"kind": "dev",
 			"methods": {},
@@ -33,11 +53,11 @@
 	},
 	"sources": {
 		"LoanManager.sol": {
-			"keccak256": "0x973cf965aec7382e33a9fbf381a0133460b2b00fa2131ff42484d396d24a0c3d",
+			"keccak256": "0xead96e15ccef2256b574cb59c8216b4e0681e7c970262c069a2976ceb47765af",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://4f7a79977149f373f2a795ce155985ca3b968526a63696a63652da652c0e6b68",
-				"dweb:/ipfs/QmShzE5oJe7bCMM9UmiyjujJ2qng5zTzpPCENanZehKpeP"
+				"bzz-raw://af24ff42d1fbc3bbeb434f754863f27e5167cf6c4bb784ed99db4979c1b14970",
+				"dweb:/ipfs/QmWWccffznirQLr74k8PTarwe81m1zhC1TA6SbpFr8Putq"
 			]
 		}
 	},
