@@ -18,7 +18,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"LoanLibrary.sol": "LoanLibrary"
+			"LoanManager.sol": "MathLib"
 		},
 		"evmVersion": "cancun",
 		"libraries": {},
@@ -32,12 +32,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"LoanLibrary.sol": {
-			"keccak256": "0xe60d13f7dfafebaf286ead33f03c7c25f3d2e800081d77b73c35b003abf7ec92",
+		"LoanManager.sol": {
+			"keccak256": "0x9663e67d852b8406277d3cf521232079e63dc8241d1907f0d890ec959c6e882f",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://2320ad6806bf5044e8ef7514bd48a21908a2c7ec0a08d8aed19c63d8f4bd2791",
-				"dweb:/ipfs/QmaF7NUZk64B6mtayxGHDBAtCHhjYVX2qGvRgaiuQoVzgf"
+				"bzz-raw://e6723841aa47ff27faaab5d90dae641cb663c386b6cced3cb60f557c2e1ddc9a",
+				"dweb:/ipfs/QmRFmw51N5Y5TQjrZyvCXGsrpJsNrYRuMJyk3TBBdNLNiV"
 			]
 		}
 	},
