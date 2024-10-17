@@ -42,7 +42,7 @@ contract LoanManager{
     event LoanRequested(uint256 loanId, address borrower, uint256 amount, LoanStatus status);
 
     //functions
-    function requestLoan(uint256 _amount, uint256 _daysOfLoan) public {
+    function requestLoan(uint256 _amount, uint256 _daysOfLoan, uint256 _annualRate) public {
         //requires
         require(_amount > 0, "The loan amount must be greater than zero");
         require(-_daysOfLoan > 0, "The loan period must be grater than zero days");
@@ -67,8 +67,8 @@ contract LoanManager{
             borrowerCreditScore = 1;
         }
 
-        function getInterestRate(_daysOfLoan, borrowerCreditScore) private {
-            
+        function getInterestRate(_daysOfLoan, borrowerCreditScore, _annualRate) private {
+
         }
 
 
