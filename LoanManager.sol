@@ -34,18 +34,51 @@ contract LoanManager{
     }
 
     uint256 private loanCounter;
+    uint16  private constant daysOfLoan = 365;
 
     mapping(uint256 => Loan) public loansById;
+    mapping(address => LoanBorrower) public loanBorrowers;
     mapping(address => uint256[]) public userLoans;
 
     //events
-    event LoanRequested(uint256 loanId, address borrower, uint256 amount, LoanStatus status);
+    event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate );
+
 
     //functions
-    function requestLoan(uint256 _amount, uint256 _daysOfLoan) public {
+
+    function loanInterestCalculator(uint8 _borrowerCreditScore) private pure returns (uint256, uint256) {
+        uint256 annualizedInterestRate;
+        uint256 annualizedPenaltyRate;
+
+        if (_borrowerCreditScore == 0) {
+            annualizedInterestRate = 2000; // 20%
+            annualizedPenaltyRate = 3000;  // 30%
+        } 
+        else if (_borrowerCreditScore == 1) {
+            annualizedInterestRate = 1200; // 12%
+            annualizedPenaltyRate = 2000;  // 20%
+        } 
+        else if (_borrowerCreditScore == 2) {
+            annualizedInterestRate = 1000; // 10%
+            annualizedPenaltyRate = 1500;  // 15%
+        }  
+        else if (_borrowerCreditScore == 3) {
+            annualizedInterestRate = 800;  // 8%
+            annualizedPenaltyRate = 1300;  // 13%
+        } 
+        else if (_borrowerCreditScore >= 4) {  
+            annualizedInterestRate = 600;  // 6%
+            annualizedPenaltyRate = 900;   // 9%
+        }
+
+        return (annualizedInterestRate, annualizedPenaltyRate);
+    }
+
+
+
+    function requestLoan(uint256 _amount) public {
         //requires
         require(_amount > 0, "The loan amount must be greater than zero");
-        require(-_daysOfLoan > 0, "The loan period must be grater than zero days");
         uint256[] memory loans = userLoans[msg.sender];
 
         for (uint i = 0; i < loans.length; i++) {
@@ -58,41 +91,14 @@ contract LoanManager{
         
         loanCounter++;
         uint numberOfLoans = userLoans[msg.sender].length;
-        uint borrowerCreditScore = LoanBorrower.creditScore;
-        uint annualizedInterestRate;
-        uint annualizedPenaltyRate;
-        
-        if(numberOfLoans == 0){
-            borrowerCreditScore = 1;
-        } else borrowerCreditScore;
+        uint8 borrowerCreditScore = (numberOfLoans == 0) ? 1 : loanBorrowers[msg.sender].creditScore;
 
-        if(borrowerCreditScore == 0){
-            annualizedInterestRate == 2000; //20% 
-            annualizedPenaltyRate == 3000;  //30%
-            } 
-        else if(borrowerCreditScore == 1){
-            annualizedInterestRate == 1200; //12%
-            annualizedPenaltyRate == 2000;  //20%
-            } 
-        else if(borrowerCreditScore == 2){
-            annualizedInterestRate == 1000; //10%
-            annualizedPenaltyRate == 1500;  //15%
-            }  
-        else if(borrowerCreditScore == 3){
-            annualizedInterestRate == 800;  //8%
-            annualizedPenaltyRate == 1300;  //13%
-            } 
-        else if(borrowerCreditScore >= 4){  
-            annualizedInterestRate == 600;  //6%
-            annualizedPenaltyRate == 900;   //9%
-            } 
-        
-
+        (uint256 annualizedInterestRate, uint256 annualizedPenaltyRate) = loanInterestCalculator(borrowerCreditScore);
 
         Loan memory newLoan = Loan({
             loanId: loanCounter,
-            borrowerAddress: LoanBorrower(msg.sender, 1, userLoans + 1 ), // Inizializza il borrower con un credit score di 1 e un array vuoto
-            lenderAddress: address(0),  // Nessun prestatore ancora assegnato
+            borrowerAddress: LoanBorrower(msg.sender, borrowerCreditScore, userLoans[msg.sender]), 
+            lenderAddress: address(0),  
             amount: _amount,
             interestRate: annualizedInterestRate,  
             penaltyRate: annualizedPenaltyRate,  
@@ -101,7 +107,14 @@ contract LoanManager{
             status: LoanStatus.Pending 
         });
 
-    };
+        loansById[loanCounter] = newLoan;
+        userLoans[msg.sender].push(loanCounter);
+
+        emit LoanRequested(loanCounter, msg.sender, _amount, LoanStatus.Pending, annualizedInterestRate);        
+
+    }
+
+
 
 
 }

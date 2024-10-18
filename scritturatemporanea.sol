@@ -1,62 +1,73 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Prestito {
-    // Variabili per le variazioni del tasso d'interesse in base al credit score
-    uint256 public aumentoCreditScore0 = 150; // 50% di aumento
-    uint256 public tassoInvariato = 100;       // Nessuna variazione
-    uint256 public diminuzioneCreditScore2 = 90; // 10% di diminuzione
-    uint256 public diminuzioneCreditScore3 = 70; // 30% di diminuzione
-    uint256 public diminuzioneCreditScore4 = 50; // 50% di diminuzione
+contract LoanContract {
+    // Definizione dell'evento
+    event LoanRequested(
+        address borrower, 
+        uint256 amount, 
+        uint256 daysOfLoan, 
+        uint256 indexed interestRate, 
+        uint256 penaltyRate
+    );
 
-    // Funzione per calcolare gli interessi di un prestito
-    function calcolaInteressi(
-        uint256 importo,       // Importo del prestito
-        uint256 tassoBase,     // Tasso d'interesse annuale di base
-        uint256 giorni,        // Giorni di prestito
-        uint8 creditScore      // Credit score (0-4)
-    ) public view returns (uint256) {
-        uint256 tassoInteresse;
+    // Funzione per calcolare il tasso di interesse
+    function loanInterestCalculator(uint8 _borrowerCreditScore) private pure returns (uint256, uint256) {
+        uint256 annualizedInterestRate;
+        uint256 annualizedPenaltyRate;
 
-        // Determinazione del tasso d'interesse in base al credit score
-        if (creditScore == 0) {
-            tassoInteresse = (tassoBase * aumentoCreditScore0) / 100; // Aumento del 50%
-        } else if (creditScore == 1) {
-            tassoInteresse = (tassoBase * tassoInvariato) / 100; // Tasso invariato
-        } else if (creditScore == 2) {
-            tassoInteresse = (tassoBase * diminuzioneCreditScore2) / 100; // Diminuzione del 10%
-        } else if (creditScore == 3) {
-            tassoInteresse = (tassoBase * diminuzioneCreditScore3) / 100; // Diminuzione del 30%
-        } else if (creditScore == 4) {
-            tassoInteresse = (tassoBase * diminuzioneCreditScore4) / 100; // Diminuzione del 50%
-        } else {
-            revert("Credit score deve essere tra 0 e 4");
+        if (_borrowerCreditScore == 0) {
+            annualizedInterestRate = 2000; // 20%
+            annualizedPenaltyRate = 3000;  // 30%
+        } 
+        else if (_borrowerCreditScore == 1) {
+            annualizedInterestRate = 1200; // 12%
+            annualizedPenaltyRate = 2000;  // 20%
+        } 
+        else if (_borrowerCreditScore == 2) {
+            annualizedInterestRate = 1000; // 10%
+            annualizedPenaltyRate = 1500;  // 15%
+        }  
+        else if (_borrowerCreditScore == 3) {
+            annualizedInterestRate = 800;  // 8%
+            annualizedPenaltyRate = 1300;  // 13%
+        } 
+        else if (_borrowerCreditScore >= 4) {  
+            annualizedInterestRate = 600;  // 6%
+            annualizedPenaltyRate = 900;   // 9%
         }
 
-        // Calcolo degli interessi
-        uint256 interessi = (importo * tassoInteresse * giorni) / (365 * 100); // Diviso per 100 per il tasso in percentuale
-
-        return interessi;
+        return (annualizedInterestRate, annualizedPenaltyRate);
     }
 
-    // Funzioni per modificare le variazioni del tasso d'interesse (opzionali)
-    function setAumentoCreditScore0(uint256 nuovoValore) public {
-        aumentoCreditScore0 = nuovoValore;
-    }
+    function requestLoan(uint256 _amount, uint256 _daysOfLoan) public {
+        // Requires
+        require(_amount > 0, "The loan amount must be greater than zero");
+        require(_daysOfLoan > 0, "The loan period must be greater than zero days"); // Corretto
 
-    function setDiminuzioneCreditScore2(uint256 nuovoValore) public {
-        diminuzioneCreditScore2 = nuovoValore;
-    }
+        uint256[] memory loans = userLoans[msg.sender];
 
-    function setDiminuzioneCreditScore3(uint256 nuovoValore) public {
-        diminuzioneCreditScore3 = nuovoValore;
-    }
+        for (uint i = 0; i < loans.length; i++) {
+            uint256 loanId = loans[i];
+            Loan memory userLoan = loansById[loanId];
 
-    function setDiminuzioneCreditScore4(uint256 nuovoValore) public {
-        diminuzioneCreditScore4 = nuovoValore;
-    }
+            require(
+                userLoan.status == LoanStatus.Paid, 
+                "You cannot request a new loan if you have pending, active, or overdue loans"
+            );
+        }
 
-    function setTassoInvariato(uint256 nuovoValore) public {
-        tassoInvariato = nuovoValore;
+        loanCounter++;
+        uint numberOfLoans = userLoans[msg.sender].length;
+        uint8 borrowerCreditScore = LoanBorrower.creditScore; // Assicurati che LoanBorrower sia accessibile
+
+        if (numberOfLoans == 0) {
+            borrowerCreditScore = 1;
+        }
+
+        // Chiamata alla funzione loanInterestCalculator e destrutturazione dei risultati
+        (uint256 interestRate, uint256 penaltyRate) = loanInterestCalculator(borrowerCreditScore);
+        
+        // Emit dell'evento con i parametri desiderati
+        emit LoanRequested(msg.sender, _amount, _daysOfLoan, interestRate, penaltyRate);
     }
 }
