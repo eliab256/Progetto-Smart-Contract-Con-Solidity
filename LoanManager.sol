@@ -42,7 +42,7 @@ contract LoanManager{
     event LoanRequested(uint256 loanId, address borrower, uint256 amount, LoanStatus status);
 
     //functions
-    function requestLoan(uint256 _amount, uint256 _daysOfLoan, uint256 _annualRate) public {
+    function requestLoan(uint256 _amount, uint256 _daysOfLoan) public {
         //requires
         require(_amount > 0, "The loan amount must be greater than zero");
         require(-_daysOfLoan > 0, "The loan period must be grater than zero days");
@@ -56,20 +56,37 @@ contract LoanManager{
             userLoan.status == LoanStatus.Paid, "You cannot request a new loan if you have pending, active, or overdue loans");
         }
         
-        //actions
         loanCounter++;
         uint numberOfLoans = userLoans[msg.sender].length;
         uint borrowerCreditScore = LoanBorrower.creditScore;
-        uint interestRateCalculation;
+        uint annualizedInterestRate;
+        uint annualizedPenaltyRate;
         
-      
         if(numberOfLoans == 0){
             borrowerCreditScore = 1;
-        }
+        } else borrowerCreditScore;
 
-        function getInterestRate(_daysOfLoan, borrowerCreditScore, _annualRate) private {
-
-        }
+        if(borrowerCreditScore == 0){
+            annualizedInterestRate == 2000; //20% 
+            annualizedPenaltyRate == 3000;  //30%
+            } 
+        else if(borrowerCreditScore == 1){
+            annualizedInterestRate == 1200; //12%
+            annualizedPenaltyRate == 2000;  //20%
+            } 
+        else if(borrowerCreditScore == 2){
+            annualizedInterestRate == 1000; //10%
+            annualizedPenaltyRate == 1500;  //15%
+            }  
+        else if(borrowerCreditScore == 3){
+            annualizedInterestRate == 800;  //8%
+            annualizedPenaltyRate == 1300;  //13%
+            } 
+        else if(borrowerCreditScore >= 4){  
+            annualizedInterestRate == 600;  //6%
+            annualizedPenaltyRate == 900;   //9%
+            } 
+        
 
 
         Loan memory newLoan = Loan({
@@ -77,8 +94,8 @@ contract LoanManager{
             borrowerAddress: LoanBorrower(msg.sender, 1, userLoans + 1 ), // Inizializza il borrower con un credit score di 1 e un array vuoto
             lenderAddress: address(0),  // Nessun prestatore ancora assegnato
             amount: _amount,
-            interestRate: 0,  
-            penaltyRate: 0,  
+            interestRate: annualizedInterestRate,  
+            penaltyRate: annualizedPenaltyRate,  
             startDate: 0,  
             dueDate: 0,  
             status: LoanStatus.Pending 
