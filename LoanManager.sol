@@ -44,12 +44,14 @@ contract LoanManager{
 
     //events
     event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate );
+    event LoanFunded(uint256 loanId, address lender, uint256 amount, uint256 startDate, uint256 dueDate);
 
     //functions
 
     //private and internal functions
 
     function loanInterestCalculator(uint8 _borrowerCreditScore) private pure returns (uint256, uint256) {
+        require(_borrowerCreditScore >= 0, "Invalid credit score");
         uint256 annualizedInterestRate;
         uint256 annualizedPenaltyRate;
 
@@ -111,20 +113,23 @@ contract LoanManager{
 
     //borrower functions
     
-    function requestLoan(uint256 _amount) public {
+    function requestLoan(uint256 _amount) external {
         //requires
         require(_amount > 0, "The loan amount must be greater than zero");
+        require(pendingLoansByAmount.length <= 500, "Loan limit reached, please wait for one to be closed to free up a slot.");
         uint256[] memory loans = userLoans[msg.sender];
 
         for (uint i = 0; i < loans.length; i++) {
             uint256 loanId = loans[i];
             Loan memory userLoan = loansById[loanId];
 
-        require(
-            userLoan.status == LoanStatus.Paid, "You cannot request a new loan if you have pending, active, or overdue loans");
+        require(userLoan.status == LoanStatus.Paid, "You cannot request a new loan if you have pending, active, or overdue loans");
         }
         
         loanCounter++;
+        if (loanBorrowers[msg.sender].borrowerAddress == address(0)) {
+            loanBorrowers;
+        }
         uint numberOfLoans = userLoans[msg.sender].length;
         uint8 borrowerCreditScore = (numberOfLoans == 0) ? 1 : loanBorrowers[msg.sender].creditScore;
 
@@ -153,8 +158,29 @@ contract LoanManager{
         return pendingLoansByAmount; 
     }
 
-     function getPendingLoanByInterestRate() public view returns (uint256[] memory) { //lender can see all the pending loan in order to interest rate 
+    function getPendingLoanByInterestRate() public view returns (uint256[] memory) { //lender can see all the pending loan in order to interest rate 
         return pendingLoansByInterestRate; 
+    }
+
+    function getLoanFunds(uint256 _loanId) external payable  {
+        Loan storage loan = loansById[_loanId];
+        address BorrowerAddress = loan.borrowerAddress.borrowerAddress;
+
+        require(loan.loanId == _loanId, "Loan not found");
+        require(loan.status == LoanStatus.Pending, "This loan doesn't need funds");
+        require(msg.value == loan.amount, "The amount sent does not match the amount requested by the borrower");
+        require(BorrowerAddress != msg.sender, "Lender and borrower cannot be the same.");  
+
+        loan.lenderAddress = msg.sender;
+        loan.amount = msg.value;
+        loan.startDate = block.timestamp;
+        loan.dueDate = block.timestamp + (daysOfLoan * 1 days) ;
+        loan.status = LoanStatus.Active;
+
+         payable(BorrowerAddress).transfer(msg.value);
+
+        emit LoanFunded(loan.loanId, msg.sender, msg.value, loan.startDate, loan.dueDate);
+        
     }
 
 
