@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.28;
 
 library LoanLibrary{
     function dailyInterestRateCalculator(uint interestRate, uint loanAmount )  internal pure returns(uint){
@@ -13,7 +13,7 @@ library LoanLibrary{
     }
  
 }
-
+ 
 contract LoanLibraryContract {
     function calculateDailyInterest(uint interestRate, uint loanAmount) public pure returns (uint) {
         return LoanLibrary.dailyInterestRateCalculator(interestRate, loanAmount);

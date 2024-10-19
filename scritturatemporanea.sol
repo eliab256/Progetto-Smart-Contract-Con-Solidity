@@ -1,73 +1,67 @@
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
 
-contract LoanContract {
-    // Definizione dell'evento
-    event LoanRequested(
-        address borrower, 
-        uint256 amount, 
-        uint256 daysOfLoan, 
-        uint256 indexed interestRate, 
-        uint256 penaltyRate
-    );
-
-    // Funzione per calcolare il tasso di interesse
-    function loanInterestCalculator(uint8 _borrowerCreditScore) private pure returns (uint256, uint256) {
-        uint256 annualizedInterestRate;
-        uint256 annualizedPenaltyRate;
-
-        if (_borrowerCreditScore == 0) {
-            annualizedInterestRate = 2000; // 20%
-            annualizedPenaltyRate = 3000;  // 30%
-        } 
-        else if (_borrowerCreditScore == 1) {
-            annualizedInterestRate = 1200; // 12%
-            annualizedPenaltyRate = 2000;  // 20%
-        } 
-        else if (_borrowerCreditScore == 2) {
-            annualizedInterestRate = 1000; // 10%
-            annualizedPenaltyRate = 1500;  // 15%
-        }  
-        else if (_borrowerCreditScore == 3) {
-            annualizedInterestRate = 800;  // 8%
-            annualizedPenaltyRate = 1300;  // 13%
-        } 
-        else if (_borrowerCreditScore >= 4) {  
-            annualizedInterestRate = 600;  // 6%
-            annualizedPenaltyRate = 900;   // 9%
-        }
-
-        return (annualizedInterestRate, annualizedPenaltyRate);
+contract UserManager {
+    struct User {
+        address userAddress;
+        bool isActive;
     }
 
-    function requestLoan(uint256 _amount, uint256 _daysOfLoan) public {
-        // Requires
-        require(_amount > 0, "The loan amount must be greater than zero");
-        require(_daysOfLoan > 0, "The loan period must be greater than zero days"); // Corretto
+    mapping(address => User) public users; // Mapping per memorizzare gli utenti
+    address[] public userAddresses; // Array per tenere traccia degli indirizzi degli utenti
 
-        uint256[] memory loans = userLoans[msg.sender];
+    // Funzione per aggiungere un nuovo utente
+    function addUser(address userAddress, bool isActive) public {
+        users[userAddress] = User(userAddress, isActive);
+        userAddresses.push(userAddress);
+    }
 
-        for (uint i = 0; i < loans.length; i++) {
-            uint256 loanId = loans[i];
-            Loan memory userLoan = loansById[loanId];
+    // Funzione per eliminare gli utenti inattivi dall'array
+    function removeInactiveUsers() public {
+        uint256 activeCount = 0;
 
-            require(
-                userLoan.status == LoanStatus.Paid, 
-                "You cannot request a new loan if you have pending, active, or overdue loans"
-            );
+        for (uint i = 0; i < userAddresses.length; i++) {
+            if (users[userAddresses[i]].isActive) {
+                // Se l'utente è attivo, manteniamo l'indirizzo
+                userAddresses[activeCount] = userAddresses[i];
+                activeCount++;
+            }
         }
 
-        loanCounter++;
-        uint numberOfLoans = userLoans[msg.sender].length;
-        uint8 borrowerCreditScore = LoanBorrower.creditScore; // Assicurati che LoanBorrower sia accessibile
-
-        if (numberOfLoans == 0) {
-            borrowerCreditScore = 1;
+        // Ridimensioniamo l'array per contenere solo gli indirizzi attivi
+        assembly {
+            mstore(userAddresses, activeCount) // Aggiorna la lunghezza dell'array
         }
+    }
 
-        // Chiamata alla funzione loanInterestCalculator e destrutturazione dei risultati
-        (uint256 interestRate, uint256 penaltyRate) = loanInterestCalculator(borrowerCreditScore);
-        
-        // Emit dell'evento con i parametri desiderati
-        emit LoanRequested(msg.sender, _amount, _daysOfLoan, interestRate, penaltyRate);
+    // Funzione per ottenere tutti gli utenti attivi
+    function getActiveUsers() public view returns (address[] memory) {
+        return userAddresses; // Ritorna l'array attuale, che può essere ridimensionato
+    }
+
+    // Funzione per aggiornare lo stato di attivazione di un utente
+    function updateUserStatus(address userAddress, bool isActive) public {
+        users[userAddress].isActive = isActive;
     }
 }
+
+
+uint256[] public pendingLoansByAmount; // Array per memorizzare gli importi dei prestiti in attesa
+
+    // Funzione per inserire un valore mantenendo l'ordine decrescente
+    function insertLoanAmount(uint256 _amount) public {
+        // Iniziamo a cercare la posizione per l'inserimento
+        uint256 i = 0;
+        
+        // Troviamo la posizione corretta per il nuovo importo
+        while (i < pendingLoansByAmount.length && pendingLoansByAmount[i] >= _amount) {
+            i++;
+        }
+
+        // Inseriamo il nuovo importo nella posizione trovata
+        pendingLoansByAmount.push(_amount); // Aggiungiamo un valore "dummy" alla fine
+        for (uint256 j = pendingLoansByAmount.length - 1; j > i; j--) {
+            pendingLoansByAmount[j] = pendingLoansByAmount[j - 1]; // Sposta gli elementi verso destra
+        }
+        pendingLoansByAmount[i] = _amount; // Inserisce il nuovo importo nella posizione corretta
+    }
