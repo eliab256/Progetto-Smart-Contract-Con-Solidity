@@ -205,13 +205,11 @@ contract LoanManager{
         Loan storage loan = loansById[_loanId];
         address BorrowerAddress = loan.borrowerAddress.borrowerAddress;
 
-        require(loan.loanId == _loanId, "Loan not found");
         require(loan.status == LoanStatus.Pending, "This loan doesn't need funds");
         require(msg.value == loan.amount, "The amount sent does not match the amount requested by the borrower");
         require(BorrowerAddress != msg.sender, "Lender and borrower cannot be the same.");  
 
         loan.lenderAddress = msg.sender;
-        loan.amount = msg.value;
         loan.startDate = block.timestamp;
         loan.dueDate = block.timestamp + (daysOfLoan * 1 days) ;
         loan.status = LoanStatus.Active;

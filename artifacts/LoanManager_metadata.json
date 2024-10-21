@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.0+commit.c7dfd78e"
+		"version": "0.8.28+commit.7893614a"
 	},
 	"language": "Solidity",
 	"output": {
@@ -17,6 +17,12 @@
 					{
 						"indexed": false,
 						"internalType": "address",
+						"name": "lender",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
 						"name": "borrower",
 						"type": "address"
 					},
@@ -28,13 +34,260 @@
 					},
 					{
 						"indexed": false,
+						"internalType": "uint256",
+						"name": "startDate",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "dueDate",
+						"type": "uint256"
+					}
+				],
+				"name": "LoanFunded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "loanId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "borrower",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
 						"internalType": "enum LoanManager.LoanStatus",
 						"name": "status",
 						"type": "uint8"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "interestRate",
+						"type": "uint256"
 					}
 				],
 				"name": "LoanRequested",
 				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "borrowerLoans",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_loanId",
+						"type": "uint256"
+					}
+				],
+				"name": "cancelLoan",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_loanId",
+						"type": "uint256"
+					}
+				],
+				"name": "getLoanFunds",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getPendingLoanDetailsByAmount",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "loanId",
+								"type": "uint256"
+							},
+							{
+								"components": [
+									{
+										"internalType": "address",
+										"name": "borrowerAddress",
+										"type": "address"
+									},
+									{
+										"internalType": "uint8",
+										"name": "creditScore",
+										"type": "uint8"
+									},
+									{
+										"internalType": "uint256[]",
+										"name": "loanHistory",
+										"type": "uint256[]"
+									}
+								],
+								"internalType": "struct LoanManager.LoanBorrower",
+								"name": "borrower",
+								"type": "tuple"
+							},
+							{
+								"internalType": "address",
+								"name": "lender",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "amount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "interestRate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "penaltyRate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "startDate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "dueDate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "enum LoanManager.LoanStatus",
+								"name": "status",
+								"type": "uint8"
+							}
+						],
+						"internalType": "struct LoanManager.Loan[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getPendingLoanDetailsByInterestRate",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "loanId",
+								"type": "uint256"
+							},
+							{
+								"components": [
+									{
+										"internalType": "address",
+										"name": "borrowerAddress",
+										"type": "address"
+									},
+									{
+										"internalType": "uint8",
+										"name": "creditScore",
+										"type": "uint8"
+									},
+									{
+										"internalType": "uint256[]",
+										"name": "loanHistory",
+										"type": "uint256[]"
+									}
+								],
+								"internalType": "struct LoanManager.LoanBorrower",
+								"name": "borrower",
+								"type": "tuple"
+							},
+							{
+								"internalType": "address",
+								"name": "lender",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "amount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "interestRate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "penaltyRate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "startDate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "dueDate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "enum LoanManager.LoanStatus",
+								"name": "status",
+								"type": "uint8"
+							}
+						],
+						"internalType": "struct LoanManager.Loan[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
 			},
 			{
 				"inputs": [
@@ -89,17 +342,17 @@
 							},
 							{
 								"internalType": "uint256[]",
-								"name": "userLoans",
+								"name": "loanHistory",
 								"type": "uint256[]"
 							}
 						],
 						"internalType": "struct LoanManager.LoanBorrower",
-						"name": "borrowerAddress",
+						"name": "borrower",
 						"type": "tuple"
 					},
 					{
 						"internalType": "address",
-						"name": "lenderAddress",
+						"name": "lender",
 						"type": "address"
 					},
 					{
@@ -142,40 +395,11 @@
 						"internalType": "uint256",
 						"name": "_amount",
 						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "_daysOfLoan",
-						"type": "uint256"
 					}
 				],
 				"name": "requestLoan",
 				"outputs": [],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "userLoans",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			}
 		],
@@ -194,7 +418,7 @@
 		"compilationTarget": {
 			"scritturatemporanea.sol": "LoanManager"
 		},
-		"evmVersion": "istanbul",
+		"evmVersion": "cancun",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
@@ -206,20 +430,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"LoanLibrary.sol": {
-			"keccak256": "0x2a29791740fed572e14a6d35394052dbd449f314663bd41054bf96a523febf29",
-			"license": "MIT",
-			"urls": [
-				"bzz-raw://d7d0079fa6e335fa7f1060504b73decbf77089afb00058f4712dc73d5bfd6ec1",
-				"dweb:/ipfs/QmZHHrBDrUm6E2LjYHv7FZ2qQvQ7SKqjzzQKi1ZXMboy6G"
-			]
-		},
 		"scritturatemporanea.sol": {
-			"keccak256": "0xe1f5fb94d3adf87634262cce462634bb2d4659003595345310ebbfa85e03b46b",
+			"keccak256": "0x6a058e186fe55bbcf475a1cb94ff853519e371ca3be166cfbdc43c77334e16bd",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://d8807d302883b56a8cf426b890b410ca573b19c20941bc0bfedb0012b39788d0",
-				"dweb:/ipfs/QmeJ4R3G6LdK9KiQJunSU1Bc2pR514Hjsu9HxUvZv81L5C"
+				"bzz-raw://9e8fb8fa60bd4a3f95089da4bfd642eca02142eaab37d8d17e46e9f1ffbd20fd",
+				"dweb:/ipfs/Qmet3CS5svPJ27CqoX35W6crWECKF7by3oAXiZ9yABy2zL"
 			]
 		}
 	},
