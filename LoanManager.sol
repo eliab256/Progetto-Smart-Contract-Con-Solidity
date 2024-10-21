@@ -45,6 +45,7 @@ contract LoanManager {
     // Events
     event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate);
     event LoanFunded(uint256 loanId, address lender, address borrower, uint256 amount, uint256 startDate, uint256 dueDate);
+    event LoanCanceled(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
 
     // Private and internal functions
 
@@ -104,13 +105,7 @@ contract LoanManager {
         borrowerLoans[_loan.borrower.borrowerAddress].push(_loan.loanId);
     }
 
-    function cancelPendingLoan(Loan storage loan) private {
-        loan.status = LoanStatus.Canceled;
-    }
-    function cancelActiveLoan(Loan storage loan) private {
-
-    }
-
+   
     // Borrower functions
 
     function requestLoan(uint256 _amount) external {
@@ -157,15 +152,21 @@ contract LoanManager {
 
         require(borrower == msg.sender, "Only the borrower can cancel this loan");
         
+        LoanStatus previousStatus = loan.status;
+        
         if (loan.status == LoanStatus.Pending) {
-            cancelPendingLoan(loan);
-        } else if (loan.status == LoanStatus.Paid && loan.startDate < cancelDeadline) {
-            cancelActiveLoan(loan); //completare con il payble e il rimborso al proprietario
+            loan.status = LoanStatus.Canceled;
+        } else if (loan.status == LoanStatus.Paid && loan.startDate < cancelDeadline && loan.amount == msg.value) {
+            loan.status = LoanStatus.Canceled;
+            payable(loan.lender).transfer(msg.value);
         } else {
             revert("No loan to cancel.");
         }
+
+        emit LoanCanceled(_loanId, borrower, loan.amount, previousStatus);
     }
 
+   
     // Lender functions
 
     function getPendingLoanDetailsByAmount() public view returns (Loan[] memory) {
