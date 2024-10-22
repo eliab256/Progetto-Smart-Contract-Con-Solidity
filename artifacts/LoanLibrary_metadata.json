@@ -18,7 +18,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"LoanLibrary.sol": "LoanLibrary"
+			"scritturatemporanea.sol": "LoanLibrary"
 		},
 		"evmVersion": "cancun",
 		"libraries": {},
@@ -32,12 +32,12 @@
 		"remappings": []
 	},
 	"sources": {
-		"LoanLibrary.sol": {
-			"keccak256": "0xe60d13f7dfafebaf286ead33f03c7c25f3d2e800081d77b73c35b003abf7ec92",
+		"scritturatemporanea.sol": {
+			"keccak256": "0xdad876a0f7c2b5efe76d2644e01041aa0f6f4705c6279dd5da7964629e2cfb49",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://2320ad6806bf5044e8ef7514bd48a21908a2c7ec0a08d8aed19c63d8f4bd2791",
-				"dweb:/ipfs/QmaF7NUZk64B6mtayxGHDBAtCHhjYVX2qGvRgaiuQoVzgf"
+				"bzz-raw://1e7142f9ac6386aaa14224a72691b751bc639ad106c7d70e6c2f8f68999e27f6",
+				"dweb:/ipfs/Qmd7wbmJmoxr7dH75Rw1JnpWU9dSuvuS1pjsyiYPXTw1RU"
 			]
 		}
 	},

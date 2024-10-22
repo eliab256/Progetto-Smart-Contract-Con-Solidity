@@ -1,0 +1,104 @@
+{
+	"compiler": {
+		"version": "0.8.28+commit.7893614a"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "interestRate",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "loanAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "daysOfLoan",
+						"type": "uint256"
+					}
+				],
+				"name": "calculateDailyInterest",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "penaltyRate",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "loanAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "daysOfDelay",
+						"type": "uint256"
+					}
+				],
+				"name": "calculateDailyPenalty",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"scritturatemporanea.sol": "LoanLibraryContract"
+		},
+		"evmVersion": "cancun",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"scritturatemporanea.sol": {
+			"keccak256": "0xdad876a0f7c2b5efe76d2644e01041aa0f6f4705c6279dd5da7964629e2cfb49",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1e7142f9ac6386aaa14224a72691b751bc639ad106c7d70e6c2f8f68999e27f6",
+				"dweb:/ipfs/Qmd7wbmJmoxr7dH75Rw1JnpWU9dSuvuS1pjsyiYPXTw1RU"
+			]
+		}
+	},
+	"version": 1
+}

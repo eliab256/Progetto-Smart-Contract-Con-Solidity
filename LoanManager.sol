@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+import "./LoanLibrary.sol";
 
 contract LoanManager {
 
@@ -12,6 +13,12 @@ contract LoanManager {
         Paid,
         Overdue,
         Canceled
+    }
+
+    enum LoanDuration{
+        Month,
+        SixMonths,
+        Year
     }
 
     // Struct to represent a borrower and his loans
@@ -32,10 +39,10 @@ contract LoanManager {
         uint256 startDate; // timestamp
         uint256 dueDate;
         LoanStatus status;
+        LoanDuration duration;
     }
 
     uint256 private loanCounter;
-    uint16 private constant loanDurationDays = 365;
 
     // Mappings to track loans and borrowers
     mapping(uint256 => Loan) public loansById;  // Tracks each loan by its ID
@@ -43,9 +50,11 @@ contract LoanManager {
     mapping(address => uint256[]) public borrowerLoans; // Tracks loans by borrower address
 
     // Events
-    event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate);
+    event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate, LoanDuration duration);
     event LoanFunded(uint256 loanId, address lender, address borrower, uint256 amount, uint256 startDate, uint256 dueDate);
     event LoanCanceled(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
+    event LoanExpiration(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus, uint8 borrowerCreditScore);
+    event LoanOverdue(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus, uint8 borrowerCreditScore, uint daysOfDelay);
 
     // Private and internal functions
 
@@ -71,7 +80,7 @@ contract LoanManager {
         return (pendingLoans, pendingLoanCount);
     }
 
-    function loanInterestCalculator(uint8 _creditScore) private pure returns (uint256, uint256) {
+    function loanInterestRateCalculator(uint8 _creditScore) private pure returns (uint256, uint256) {
         require(_creditScore <= 4, "Invalid credit score"); // Maximum credit score is 4
         uint256 annualizedInterestRate;
         uint256 annualizedPenaltyRate;
@@ -108,7 +117,7 @@ contract LoanManager {
    
     // Borrower functions
 
-    function requestLoan(uint256 _amount) external {
+    function requestLoan(uint256 _amount, LoanDuration _duration) external {
         require(_amount > 0, "The loan amount must be greater than zero");
 
         (, uint256 pendingLoansCount) = getPendingLoansArray();
@@ -126,7 +135,7 @@ contract LoanManager {
         uint256 numberOfLoans = borrowerLoans[msg.sender].length;
         uint8 borrowerCreditScore = (numberOfLoans == 0) ? 1 : loanBorrowers[msg.sender].creditScore;
 
-        (uint256 annualizedInterestRate, uint256 annualizedPenaltyRate) = loanInterestCalculator(borrowerCreditScore);
+        (uint256 annualizedInterestRate, uint256 annualizedPenaltyRate) = loanInterestRateCalculator(borrowerCreditScore);
 
         Loan memory newLoan = Loan({
             loanId: loanCounter,
@@ -137,12 +146,13 @@ contract LoanManager {
             penaltyRate: annualizedPenaltyRate,
             startDate: 0,
             dueDate: 0,
-            status: LoanStatus.Pending
+            status: LoanStatus.Pending,
+            duration: _duration
         });
 
         addNewLoan(newLoan);
 
-        emit LoanRequested(loanCounter, msg.sender, _amount, LoanStatus.Pending, annualizedInterestRate);
+        emit LoanRequested(loanCounter, msg.sender, _amount, LoanStatus.Pending, annualizedInterestRate, _duration);
     }
 
     function cancelLoan(uint256 _loanId) external payable {
@@ -156,7 +166,8 @@ contract LoanManager {
         
         if (loan.status == LoanStatus.Pending) {
             loan.status = LoanStatus.Canceled;
-        } else if (loan.status == LoanStatus.Paid && loan.startDate < cancelDeadline && loan.amount == msg.value) {
+        } else if (loan.status == LoanStatus.Paid && loan.startDate < cancelDeadline) {
+            require( loan.amount == msg.value,"");
             loan.status = LoanStatus.Canceled;
             payable(loan.lender).transfer(msg.value);
         } else {
@@ -164,6 +175,20 @@ contract LoanManager {
         }
 
         emit LoanCanceled(_loanId, borrower, loan.amount, previousStatus);
+    }
+
+    function repayLoan(uint256 _loanId) external payable{
+        Loan storage loan = loansById[_loanId];
+
+        require(msg.sender == loan.borrower.borrowerAddress, "Only the borrower can repay his loan");
+        require(loan.status == LoanStatus.Active || loan.status == LoanStatus.Overdue, "There is no loan to repay");
+        require(msg.value == loan.amount, "");
+
+
+
+
+
+        
     }
 
    
@@ -199,14 +224,44 @@ contract LoanManager {
         return pendingLoans;
     }
 
+    function getPendingLoanByDuration(LoanDuration _duration) public view returns (Loan[] memory){
+        (Loan[] memory pendingLoans, uint256 pendingLoanCount) = getPendingLoansArray();
+        uint256 matchingLoanCount = 0;
+        for (uint256 i = 0; i < pendingLoanCount; i++) {
+            if (pendingLoans[i].duration == _duration) {
+               matchingLoanCount++;
+            }
+        }
+
+        Loan[] memory matchingLoans = new Loan[](matchingLoanCount);
+        uint256 index = 0;
+
+        for(uint256 i = 0; i < pendingLoanCount; i++){
+            if(pendingLoans[i].duration == _duration){
+                matchingLoans[index] = pendingLoans[i];
+                index++;
+            }   
+        }
+        return matchingLoans;
+    }
+
     function getLoanFunds(uint256 _loanId) external payable {
         Loan storage loan = loansById[_loanId];
         address borrower = loan.borrower.borrowerAddress;
+        uint loanDurationDays;
 
         require(loan.loanId == _loanId, "Loan not found");
         require(loan.status == LoanStatus.Pending, "This loan doesn't need funding");
         require(msg.value == loan.amount, "The amount sent does not match the requested loan amount");
         require(borrower != msg.sender, "Lender and borrower cannot be the same");
+
+        if(loan.duration == LoanDuration.Month){
+            loanDurationDays = 30;
+        } else if (loan.duration == LoanDuration.SixMonths){
+            loanDurationDays = 90;
+        } else if (loan.duration == LoanDuration.Year){
+            loanDurationDays = 365;
+        }
 
         loan.lender = msg.sender;
         loan.startDate = block.timestamp;
