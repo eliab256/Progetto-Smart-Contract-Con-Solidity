@@ -14,7 +14,7 @@ contract LoanManager {
         Canceled
     }
 
-    // Struct to represent a borrower and their loans
+    // Struct to represent a borrower and his loans
     struct LoanBorrower {
         address borrowerAddress;
         uint8 creditScore;

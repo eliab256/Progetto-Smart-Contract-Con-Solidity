@@ -2,24 +2,34 @@
 pragma solidity ^0.8.28;
 
 library LoanLibrary{
-    function dailyInterestRateCalculator(uint interestRate, uint loanAmount )  internal pure returns(uint){
-        uint dailyInterestRate = (loanAmount * interestRate)/(100*365);
-        return dailyInterestRate;
+    function interestCalculator(uint annualInterestRate, uint loanAmount, uint daysOfLoan)  internal pure returns(uint){
+        uint256 dailyInterestRate = annualInterestRate / 100 / 365;
+
+        for (uint256 i = 0; i < daysOfLoan; i++) {
+        loanAmount = loanAmount + (loanAmount * (dailyInterestRate/100));
     }
 
-    function dailyPenaltyRateCalculator(uint penaltyRate, uint loanAmount, uint dailydelay) internal pure returns (uint) {
-        uint penaltyAmount = (loanAmount * penaltyRate * dailydelay) / (100 * 365);
-        return penaltyAmount;
+    return loanAmount; 
+    }
+
+    function penaltyCalculator(uint annualPenaltyRate, uint loanAmount, uint daysOfDelay) internal pure returns (uint) {
+        uint256 dailyPenaltyRate = annualPenaltyRate / 100 / 365;
+
+        for (uint256 i = 0; i < daysOfDelay; i++) {
+        loanAmount = loanAmount + (loanAmount * (dailyPenaltyRate/100));
+    }
+
+    return loanAmount; 
     }
  
 }
  
 contract LoanLibraryContract {
-    function calculateDailyInterest(uint interestRate, uint loanAmount) public pure returns (uint) {
-        return LoanLibrary.dailyInterestRateCalculator(interestRate, loanAmount);
+    function calculateDailyInterest(uint interestRate, uint loanAmount, uint daysOfLoan) public pure returns (uint) {
+        return LoanLibrary.interestCalculator(interestRate, loanAmount, daysOfLoan);
     }
 
-    function calculateDailyPenalty(uint penaltyRate, uint loanAmount, uint dailydelay) public pure returns (uint) {
-        return LoanLibrary.dailyPenaltyRateCalculator(penaltyRate, loanAmount, dailydelay);
+    function calculateDailyPenalty(uint penaltyRate, uint loanAmount, uint daysOfDelay) public pure returns (uint) {
+        return LoanLibrary.penaltyCalculator(penaltyRate, loanAmount, daysOfDelay);
     }
 }
