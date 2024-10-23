@@ -25,11 +25,11 @@ library LoanLibrary{
 }
  
 contract LoanLibraryContract {
-    function calculateDailyInterest(uint interestRate, uint loanAmount, uint daysOfLoan) public pure returns (uint) {
+    function interestCalculator(uint interestRate, uint loanAmount, uint daysOfLoan) public pure returns (uint) {
         return LoanLibrary.interestCalculator(interestRate, loanAmount, daysOfLoan);
     }
 
-    function calculateDailyPenalty(uint penaltyRate, uint loanAmount, uint daysOfDelay) public pure returns (uint) {
+    function penaltyCalculator(uint penaltyRate, uint loanAmount, uint daysOfDelay) public pure returns (uint) {
         return LoanLibrary.penaltyCalculator(penaltyRate, loanAmount, daysOfDelay);
     }
 }

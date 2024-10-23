@@ -15,6 +15,7 @@ contract LoanManager {
         Canceled
     }
 
+    //Enum to rapresent lenght of loan options
     enum LoanDuration{
         Month,
         SixMonths,
@@ -36,7 +37,7 @@ contract LoanManager {
         uint256 amount;
         uint256 interestRate; // in percent (use a scale of 100, e.g., 525 = 5.25%)
         uint256 penaltyRate;
-        uint256 startDate; // timestamp
+        uint256 startDate;    // timestamp
         uint256 dueDate;
         LoanStatus status;
         LoanDuration duration;
@@ -44,20 +45,19 @@ contract LoanManager {
 
     uint256 private loanCounter;
 
-    // Mappings to track loans and borrowers
+// Mappings to track loans and borrowers
     mapping(uint256 => Loan) public loansById;  // Tracks each loan by its ID
     mapping(address => LoanBorrower) public loanBorrowers; // Tracks each borrower with their loan history
     mapping(address => uint256[]) public borrowerLoans; // Tracks loans by borrower address
 
-    // Events
+// Events
     event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate, LoanDuration duration);
     event LoanFunded(uint256 loanId, address lender, address borrower, uint256 amount, uint256 startDate, uint256 dueDate);
     event LoanCanceled(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
     event LoanExpiration(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus, uint8 borrowerCreditScore);
     event LoanOverdue(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus, uint8 borrowerCreditScore, uint daysOfDelay);
 
-    // Private and internal functions
-
+// Private and internal functions
     function getPendingLoansArray() private view returns (Loan[] memory, uint256) {
         uint256 pendingLoanCount = 0;
 
@@ -87,23 +87,23 @@ contract LoanManager {
 
         if (_creditScore == 0) {
             annualizedInterestRate = 2000; // 20%
-            annualizedPenaltyRate = 3000;  // 30%
+            annualizedPenaltyRate = 5000;  // 50%
         } 
         else if (_creditScore == 1) {
             annualizedInterestRate = 1200; // 12%
-            annualizedPenaltyRate = 2000;  // 20%
+            annualizedPenaltyRate = 4000;  // 40%
         } 
         else if (_creditScore == 2) {
             annualizedInterestRate = 1000; // 10%
-            annualizedPenaltyRate = 1500;  // 15%
+            annualizedPenaltyRate = 3500;  // 35%
         }  
         else if (_creditScore == 3) {
             annualizedInterestRate = 800;  // 8%
-            annualizedPenaltyRate = 1300;  // 13%
+            annualizedPenaltyRate = 2500;  // 25%
         } 
         else if (_creditScore >= 4) {  
             annualizedInterestRate = 600;  // 6%
-            annualizedPenaltyRate = 900;   // 9%
+            annualizedPenaltyRate = 1500;  // 15%
         }
 
         return (annualizedInterestRate, annualizedPenaltyRate);
@@ -114,9 +114,23 @@ contract LoanManager {
         borrowerLoans[_loan.borrower.borrowerAddress].push(_loan.loanId);
     }
 
-   
-    // Borrower functions
+    function getDaysOfLoanDuration(LoanDuration duration) private pure returns (uint256){
+        if(duration == LoanDuration.Month){
+            return 30;
+        } else if (duration == LoanDuration.SixMonths){
+            return 180;
+        } else if (duration == LoanDuration.Year){
+            return 365;
+        } else {
+        revert("Invalid loan duration");
+        }
+    }
 
+    function getFinalAmount(uint _amount, uint _interestRate, uint _penaltyRate) private pure returns (uint256){
+
+    }
+
+// Borrower functions
     function requestLoan(uint256 _amount, LoanDuration _duration) external {
         require(_amount > 0, "The loan amount must be greater than zero");
 
@@ -177,23 +191,43 @@ contract LoanManager {
         emit LoanCanceled(_loanId, borrower, loan.amount, previousStatus);
     }
 
+    function checkFinalAmount(uint256 _loanId) external view {
+        Loan storage loan = loansById[_loanId];
+        LoanBorrower storage loanBorrower = loan.borrower;
+        address LoanLender = loan.lender;
+
+        require(msg.sender == loanBorrower.borrowerAddress || msg.sender == LoanLender, "You are neither borrower or lender");
+      
+    }
+
     function repayLoan(uint256 _loanId) external payable{
         Loan storage loan = loansById[_loanId];
+        LoanBorrower storage loanBorrower = loan.borrower;
 
         require(msg.sender == loan.borrower.borrowerAddress, "Only the borrower can repay his loan");
         require(loan.status == LoanStatus.Active || loan.status == LoanStatus.Overdue, "There is no loan to repay");
         require(msg.value == loan.amount, "");
 
+        uint repayAmount;
+        uint loanDurationDays = getDaysOfLoanDuration(loan.duration);
 
+        if(block.timestamp <= loan.dueDate){
+            loan.status = LoanStatus.Paid;
+            if(loanBorrower.creditScore <4){
+            loanBorrower.creditScore = loanBorrower.creditScore ++;
+            }
+            repayAmount = LoanLibrary.interestCalculator(loan.interestRate, loan.amount, loanDurationDays);
 
-
-
+        } else if(block.timestamp > loan.dueDate){
+            loan.status = LoanStatus.Overdue;
+            if(loanBorrower.creditScore >= 1){
+            loanBorrower.creditScore = loanBorrower.creditScore --;
+            }
+        }
         
     }
-
    
-    // Lender functions
-
+// Lender functions
     function getPendingLoanDetailsByAmount() public view returns (Loan[] memory) {
         (Loan[] memory pendingLoans, uint256 pendingLoanCount) = getPendingLoansArray();
 
@@ -248,20 +282,13 @@ contract LoanManager {
     function getLoanFunds(uint256 _loanId) external payable {
         Loan storage loan = loansById[_loanId];
         address borrower = loan.borrower.borrowerAddress;
-        uint loanDurationDays;
 
         require(loan.loanId == _loanId, "Loan not found");
         require(loan.status == LoanStatus.Pending, "This loan doesn't need funding");
         require(msg.value == loan.amount, "The amount sent does not match the requested loan amount");
         require(borrower != msg.sender, "Lender and borrower cannot be the same");
 
-        if(loan.duration == LoanDuration.Month){
-            loanDurationDays = 30;
-        } else if (loan.duration == LoanDuration.SixMonths){
-            loanDurationDays = 90;
-        } else if (loan.duration == LoanDuration.Year){
-            loanDurationDays = 365;
-        }
+        uint loanDurationDays = getDaysOfLoanDuration(loan.duration);
 
         loan.lender = msg.sender;
         loan.startDate = block.timestamp;
