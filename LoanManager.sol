@@ -54,7 +54,7 @@ contract LoanManager {
     event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate, LoanDuration duration);
     event LoanFunded(uint256 loanId, address lender, address borrower, uint256 amount, uint256 startDate, uint256 dueDate);
     event LoanCanceled(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
-    event LoanExpiration(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus, uint8 borrowerCreditScore);
+    event LoanExpiration(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
     event LoanOverdue(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus, uint8 borrowerCreditScore, uint daysOfDelay);
 
 // Private and internal functions
@@ -126,12 +126,8 @@ contract LoanManager {
         }
     }
 
-    function getFinalAmount(uint _amount, uint _interestRate, uint _penaltyRate) private pure returns (uint256){
-
-    }
-
 // Borrower functions
-    function requestLoan(uint256 _amount, LoanDuration _duration) external {
+    function requestLoan(uint256 _amount, LoanDuration _duration) external {//modificare il fatto che possa solo essere paid
         require(_amount > 0, "The loan amount must be greater than zero");
 
         (, uint256 pendingLoansCount) = getPendingLoansArray();
@@ -141,7 +137,7 @@ contract LoanManager {
         for (uint i = 0; i < loans.length; i++) {
             uint256 loanId = loans[i];
             Loan memory userLoan = loansById[loanId];
-            require(userLoan.status == LoanStatus.Paid, "You cannot request a new loan if you have pending, active, or overdue loans.");
+            require(userLoan.status == LoanStatus.Paid, "You cannot request a new loan if you have pending, active, or overdue loans."); 
         }
 
         loanCounter++;
@@ -191,43 +187,47 @@ contract LoanManager {
         emit LoanCanceled(_loanId, borrower, loan.amount, previousStatus);
     }
 
-    function checkFinalAmount(uint256 _loanId) external view {
-        Loan storage loan = loansById[_loanId];
-        LoanBorrower storage loanBorrower = loan.borrower;
-        address LoanLender = loan.lender;
-
-        require(msg.sender == loanBorrower.borrowerAddress || msg.sender == LoanLender, "You are neither borrower or lender");
-      
-    }
-
     function repayLoan(uint256 _loanId) external payable{
         Loan storage loan = loansById[_loanId];
         LoanBorrower storage loanBorrower = loan.borrower;
 
-        require(msg.sender == loan.borrower.borrowerAddress, "Only the borrower can repay his loan");
+        require(msg.sender == loan.borrower.borrowerAddress, "Only the borrower can repay this loan");
         require(loan.status == LoanStatus.Active || loan.status == LoanStatus.Overdue, "There is no loan to repay");
-        require(msg.value == loan.amount, "");
 
         uint repayAmount;
         uint loanDurationDays = getDaysOfLoanDuration(loan.duration);
+        uint loanDelayDays = (block.timestamp - loan.dueDate + 86399) / 86400;
 
         if(block.timestamp <= loan.dueDate){
-            loan.status = LoanStatus.Paid;
-            if(loanBorrower.creditScore <4){
-            loanBorrower.creditScore = loanBorrower.creditScore ++;
-            }
             repayAmount = LoanLibrary.interestCalculator(loan.interestRate, loan.amount, loanDurationDays);
-
+            
+            if(msg.value >= repayAmount){
+                loan.status = LoanStatus.Paid;
+                if(loanBorrower.creditScore <4){
+                    loanBorrower.creditScore = loanBorrower.creditScore ++;
+                }
+                payable(loan.lender).transfer(msg.value);
+            } else revert("Insufficient funds");
+    
         } else if(block.timestamp > loan.dueDate){
-            loan.status = LoanStatus.Overdue;
-            if(loanBorrower.creditScore >= 1){
-            loanBorrower.creditScore = loanBorrower.creditScore --;
-            }
+            uint regularRepayAmount = LoanLibrary.interestCalculator(loan.interestRate, loan.amount, loanDurationDays);
+            repayAmount = LoanLibrary.penaltyCalculator(loan.penaltyRate,regularRepayAmount, loanDelayDays);
+            
+            if(msg.value >= repayAmount){
+                loan.status = LoanStatus.Overdue;
+                if(loanBorrower.creditScore >= 1){
+                loanBorrower.creditScore = loanBorrower.creditScore --;
+                }
+                payable(loan.lender).transfer(msg.value);
+                loan.status = LoanStatus.Paid;
+            } else revert("Insufficient funds to repay the overdue loan");
         }
+
+        emit LoanExpiration(_loanId, loanBorrower.borrowerAddress, repayAmount, loan.status);
         
     }
    
-// Lender functions
+// Info functions
     function getPendingLoanDetailsByAmount() public view returns (Loan[] memory) {
         (Loan[] memory pendingLoans, uint256 pendingLoanCount) = getPendingLoansArray();
 
@@ -279,6 +279,8 @@ contract LoanManager {
         return matchingLoans;
     }
 
+
+//Lender functions
     function getLoanFunds(uint256 _loanId) external payable {
         Loan storage loan = loansById[_loanId];
         address borrower = loan.borrower.borrowerAddress;
