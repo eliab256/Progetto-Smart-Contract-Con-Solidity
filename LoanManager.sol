@@ -3,8 +3,10 @@
 pragma solidity ^0.8.0;
 
 import "./LoanLibrary.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract LoanManager {
+
+contract LoanManager is ReentrancyGuard{
 
     // Enum to represent loan statuses
     enum LoanStatus {
@@ -54,8 +56,8 @@ contract LoanManager {
     event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate, LoanDuration duration);
     event LoanFunded(uint256 loanId, address lender, address borrower, uint256 amount, uint256 startDate, uint256 dueDate);
     event LoanCanceled(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
-    event LoanExpiration(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
-    event LoanOverdue(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus, uint8 borrowerCreditScore, uint daysOfDelay);
+    event LoanRepaid(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status);
+
 
 // Private and internal functions
     function getPendingLoansArray() private view returns (Loan[] memory, uint256) {
@@ -126,6 +128,26 @@ contract LoanManager {
         }
     }
 
+    function checkRepayLoanInfo(uint _loanId) private view returns(uint256, bool){
+        Loan storage loan = loansById[_loanId];
+
+        uint repayAmount;
+        uint loanDurationDays = getDaysOfLoanDuration(loan.duration);
+        uint loanDelayDays = (block.timestamp - loan.dueDate + 86399) / 86400;
+        bool overdueLoan;
+
+        if(block.timestamp <= loan.dueDate){
+            repayAmount = LoanLibrary.interestCalculator(loan.interestRate, loan.amount, loanDurationDays);
+            overdueLoan = false;
+        } else if(block.timestamp > loan.dueDate){
+            uint regularRepayAmount = LoanLibrary.interestCalculator(loan.interestRate, loan.amount, loanDurationDays);
+            repayAmount = LoanLibrary.penaltyCalculator(loan.penaltyRate,regularRepayAmount, loanDelayDays);
+            overdueLoan = true;
+        }
+
+        return (repayAmount, overdueLoan);
+    }
+
 // Borrower functions
     function requestLoan(uint256 _amount, LoanDuration _duration) external {//modificare il fatto che possa solo essere paid
         require(_amount > 0, "The loan amount must be greater than zero");
@@ -165,7 +187,7 @@ contract LoanManager {
         emit LoanRequested(loanCounter, msg.sender, _amount, LoanStatus.Pending, annualizedInterestRate, _duration);
     }
 
-    function cancelLoan(uint256 _loanId) external payable {
+    function cancelLoan(uint256 _loanId) external payable nonReentrant{
         Loan storage loan = loansById[_loanId];
         address borrower = loan.borrower.borrowerAddress;
         uint256 cancelDeadline = loan.startDate + 1 days;
@@ -187,47 +209,38 @@ contract LoanManager {
         emit LoanCanceled(_loanId, borrower, loan.amount, previousStatus);
     }
 
-    function repayLoan(uint256 _loanId) external payable{
+    function repayLoan(uint256 _loanId) external payable nonReentrant{
         Loan storage loan = loansById[_loanId];
         LoanBorrower storage loanBorrower = loan.borrower;
 
         require(msg.sender == loan.borrower.borrowerAddress, "Only the borrower can repay this loan");
         require(loan.status == LoanStatus.Active || loan.status == LoanStatus.Overdue, "There is no loan to repay");
 
-        uint repayAmount;
-        uint loanDurationDays = getDaysOfLoanDuration(loan.duration);
-        uint loanDelayDays = (block.timestamp - loan.dueDate + 86399) / 86400;
+        (uint repayAmount, ) = checkRepayLoanInfo(_loanId);
 
-        if(block.timestamp <= loan.dueDate){
-            repayAmount = LoanLibrary.interestCalculator(loan.interestRate, loan.amount, loanDurationDays);
-            
-            if(msg.value >= repayAmount){
-                loan.status = LoanStatus.Paid;
+        if(msg.value >= repayAmount){
+
+            if(block.timestamp <= loan.dueDate){
                 if(loanBorrower.creditScore <4){
                     loanBorrower.creditScore = loanBorrower.creditScore ++;
                 }
-                payable(loan.lender).transfer(msg.value);
-            } else revert("Insufficient funds");
-    
-        } else if(block.timestamp > loan.dueDate){
-            uint regularRepayAmount = LoanLibrary.interestCalculator(loan.interestRate, loan.amount, loanDurationDays);
-            repayAmount = LoanLibrary.penaltyCalculator(loan.penaltyRate,regularRepayAmount, loanDelayDays);
-            
-            if(msg.value >= repayAmount){
-                loan.status = LoanStatus.Overdue;
+                loan.status = LoanStatus.Paid;  
+            } else if(block.timestamp > loan.dueDate){
                 if(loanBorrower.creditScore >= 1){
-                loanBorrower.creditScore = loanBorrower.creditScore --;
+                    loanBorrower.creditScore = loanBorrower.creditScore --;
                 }
-                payable(loan.lender).transfer(msg.value);
-                loan.status = LoanStatus.Paid;
-            } else revert("Insufficient funds to repay the overdue loan");
-        }
+                loan.status = LoanStatus.Overdue; 
+            }
 
-        emit LoanExpiration(_loanId, loanBorrower.borrowerAddress, repayAmount, loan.status);
-        
+            payable(loan.lender).transfer(msg.value);
+        } else revert("Insufficient funds to repay the overdue loan");
+
+        emit LoanRepaid(_loanId, loanBorrower.borrowerAddress, repayAmount, loan.status);   
     }
    
 // Info functions
+
+
     function getPendingLoanDetailsByAmount() public view returns (Loan[] memory) {
         (Loan[] memory pendingLoans, uint256 pendingLoanCount) = getPendingLoansArray();
 
@@ -279,9 +292,22 @@ contract LoanManager {
         return matchingLoans;
     }
 
+    function getRepayLoanInfo(uint _loanId) public view returns (uint256, LoanStatus){
+        
+        (uint256 repayAmount, ) = checkRepayLoanInfo(_loanId);
+        (, bool overdueLoan) = checkRepayLoanInfo(_loanId);
+        LoanStatus loanStatusCheck;
+
+        if(overdueLoan){
+            loanStatusCheck = LoanStatus.Active;
+        } else if(!overdueLoan){
+            loanStatusCheck = LoanStatus.Overdue;
+        }
+        return(repayAmount, loanStatusCheck);
+    }
 
 //Lender functions
-    function getLoanFunds(uint256 _loanId) external payable {
+    function getLoanFunds(uint256 _loanId) external payable nonReentrant{
         Loan storage loan = loansById[_loanId];
         address borrower = loan.borrower.borrowerAddress;
 
