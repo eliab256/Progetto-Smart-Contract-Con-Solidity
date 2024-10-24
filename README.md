@@ -29,28 +29,28 @@ This project involves a Solidity smart contract deployed on the Sepolia testnet,
 
 ## 5. Technical Choices
 
-    ###Language
+    Language
         -- **Solidity**: Solidity was chosen as it is the primary language for developing smart contracts on the Ethereum platform.
 
-    ### Tools
+    Tools
          -- **Remix IDE**: Remix was used to write, test, and deploy the contract. It is an online development environment that offers a wide range of tools to facilitate the development process.
 
-    ### Libraries
+    Libraries
         -- **ReentracyGyard**: A library to prevent Reentrancy Attack, to import:  import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
         -- **LoanLibrary**: A library i made to calculate the amount of interest and penalty, to import import "./LoanLibrary.sol";
 
-    ### Main Features
-        #### Anyone can:
+    Main Features
+        Anyone can:
             - Search for loan details using the loan ID
             - Search for borrower details using a specific address
             - View the status of any loan at any time
            
-            A potential borrower can:
+        A potential borrower can:
             - Request a loan for any desired amount, to be repaid by a predetermined deadline (1 month, 6 months, 1 year)
             - Cancel the loan if it has not been filled, or within one day of receiving the funds by returning them to the lender
             - Repay the loan by the due date; if the deadline is missed, penalties apply, adding interest
 
-            A potential lender can:
+        A potential lender can:
             - View pending loan requests sorted by amount
             - View pending loan requests sorted by interest rate
             - Filter pending loan requests by repayment deadline
