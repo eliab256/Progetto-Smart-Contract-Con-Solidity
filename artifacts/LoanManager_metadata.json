@@ -15,6 +15,37 @@
 						"type": "uint256"
 					},
 					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "borrower",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum LoanManager.LoanStatus",
+						"name": "previousStatus",
+						"type": "uint8"
+					}
+				],
+				"name": "LoanCanceled",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "loanId",
+						"type": "uint256"
+					},
+					{
 						"indexed": false,
 						"internalType": "address",
 						"name": "lender",
@@ -76,10 +107,53 @@
 						"type": "uint8"
 					},
 					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "repayAmount",
+						"type": "uint256"
+					}
+				],
+				"name": "LoanRepaid",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "loanId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "borrower",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum LoanManager.LoanStatus",
+						"name": "status",
+						"type": "uint8"
+					},
+					{
 						"indexed": true,
 						"internalType": "uint256",
 						"name": "interestRate",
 						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum LoanManager.LoanDuration",
+						"name": "duration",
+						"type": "uint8"
 					}
 				],
 				"name": "LoanRequested",
@@ -133,6 +207,99 @@
 				"name": "getLoanFunds",
 				"outputs": [],
 				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "enum LoanManager.LoanDuration",
+						"name": "_duration",
+						"type": "uint8"
+					}
+				],
+				"name": "getPendingLoanByDuration",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "loanId",
+								"type": "uint256"
+							},
+							{
+								"components": [
+									{
+										"internalType": "address",
+										"name": "borrowerAddress",
+										"type": "address"
+									},
+									{
+										"internalType": "uint8",
+										"name": "creditScore",
+										"type": "uint8"
+									},
+									{
+										"internalType": "uint256[]",
+										"name": "loanHistory",
+										"type": "uint256[]"
+									}
+								],
+								"internalType": "struct LoanManager.LoanBorrower",
+								"name": "borrower",
+								"type": "tuple"
+							},
+							{
+								"internalType": "address",
+								"name": "lender",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "amount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "interestRate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "penaltyRate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "startDate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "dueDate",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "repayAmount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "enum LoanManager.LoanStatus",
+								"name": "status",
+								"type": "uint8"
+							},
+							{
+								"internalType": "enum LoanManager.LoanDuration",
+								"name": "duration",
+								"type": "uint8"
+							}
+						],
+						"internalType": "struct LoanManager.Loan[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -199,8 +366,18 @@
 								"type": "uint256"
 							},
 							{
+								"internalType": "uint256",
+								"name": "repayAmount",
+								"type": "uint256"
+							},
+							{
 								"internalType": "enum LoanManager.LoanStatus",
 								"name": "status",
+								"type": "uint8"
+							},
+							{
+								"internalType": "enum LoanManager.LoanDuration",
+								"name": "duration",
 								"type": "uint8"
 							}
 						],
@@ -276,14 +453,48 @@
 								"type": "uint256"
 							},
 							{
+								"internalType": "uint256",
+								"name": "repayAmount",
+								"type": "uint256"
+							},
+							{
 								"internalType": "enum LoanManager.LoanStatus",
 								"name": "status",
+								"type": "uint8"
+							},
+							{
+								"internalType": "enum LoanManager.LoanDuration",
+								"name": "duration",
 								"type": "uint8"
 							}
 						],
 						"internalType": "struct LoanManager.Loan[]",
 						"name": "",
 						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_loanId",
+						"type": "uint256"
+					}
+				],
+				"name": "getRepayLoanInfo",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum LoanManager.LoanStatus",
+						"name": "",
+						"type": "uint8"
 					}
 				],
 				"stateMutability": "view",
@@ -381,8 +592,18 @@
 						"type": "uint256"
 					},
 					{
+						"internalType": "uint256",
+						"name": "repayAmount",
+						"type": "uint256"
+					},
+					{
 						"internalType": "enum LoanManager.LoanStatus",
 						"name": "status",
+						"type": "uint8"
+					},
+					{
+						"internalType": "enum LoanManager.LoanDuration",
+						"name": "duration",
 						"type": "uint8"
 					}
 				],
@@ -393,8 +614,26 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
+						"name": "_loanId",
+						"type": "uint256"
+					}
+				],
+				"name": "repayLoan",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
 						"name": "_amount",
 						"type": "uint256"
+					},
+					{
+						"internalType": "enum LoanManager.LoanDuration",
+						"name": "_duration",
+						"type": "uint8"
 					}
 				],
 				"name": "requestLoan",
@@ -416,7 +655,7 @@
 	},
 	"settings": {
 		"compilationTarget": {
-			"scritturatemporanea.sol": "LoanManager"
+			"LoanManager.sol": "LoanManager"
 		},
 		"evmVersion": "cancun",
 		"libraries": {},
@@ -430,12 +669,28 @@
 		"remappings": []
 	},
 	"sources": {
-		"scritturatemporanea.sol": {
-			"keccak256": "0x6a058e186fe55bbcf475a1cb94ff853519e371ca3be166cfbdc43c77334e16bd",
+		"@openzeppelin/contracts/security/ReentrancyGuard.sol": {
+			"keccak256": "0xa535a5df777d44e945dd24aa43a11e44b024140fc340ad0dfe42acf4002aade1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://9e8fb8fa60bd4a3f95089da4bfd642eca02142eaab37d8d17e46e9f1ffbd20fd",
-				"dweb:/ipfs/Qmet3CS5svPJ27CqoX35W6crWECKF7by3oAXiZ9yABy2zL"
+				"bzz-raw://41319e7f621f2dc3733511332c4fd032f8e32ad2aa7fd6f665c19741d9941a34",
+				"dweb:/ipfs/QmcYR3bd862GD1Bc7jwrU9bGxrhUu5na1oP964bDCu2id1"
+			]
+		},
+		"LoanLibrary.sol": {
+			"keccak256": "0xf48bd292089e9c32b3cc9b8001b17ae23bc9f612805addefb4d1c6044314988b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6b9e1746ad7f90370c6fe8caaf4f8d1d2dc0a2df6db5d836b8d0a300ede925c5",
+				"dweb:/ipfs/QmPwSb5ruqrBR6ppijYEtmGQZ6T1EzbmwrXKQqzDEHxMGV"
+			]
+		},
+		"LoanManager.sol": {
+			"keccak256": "0x66d63899674e789abf9cd85be153046e5bb841bed817fac8732d5714eb0457c9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d2dab2f4baac037e56746c98b47ebb1d4b95f0ac087a64bbf37f2616b0975dce",
+				"dweb:/ipfs/QmZHQ1adjdArr8VwXEXgyYUiRmx9FuwZZKKpEp237zfNgo"
 			]
 		}
 	},

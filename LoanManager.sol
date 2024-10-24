@@ -41,6 +41,7 @@ contract LoanManager is ReentrancyGuard{
         uint256 penaltyRate;
         uint256 startDate;    // timestamp
         uint256 dueDate;
+        uint256 repayAmount;
         LoanStatus status;
         LoanDuration duration;
     }
@@ -56,7 +57,7 @@ contract LoanManager is ReentrancyGuard{
     event LoanRequested(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint256 indexed interestRate, LoanDuration duration);
     event LoanFunded(uint256 loanId, address lender, address borrower, uint256 amount, uint256 startDate, uint256 dueDate);
     event LoanCanceled(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus previousStatus);
-    event LoanRepaid(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status);
+    event LoanRepaid(uint256 loanId, address indexed borrower, uint256 indexed amount, LoanStatus status, uint repayAmount);
 
 
 // Private and internal functions
@@ -148,6 +149,13 @@ contract LoanManager is ReentrancyGuard{
         return (repayAmount, overdueLoan);
     }
 
+    function refundExcess(uint256 amount, address destination) internal {
+        uint256 excessAmount = msg.value - amount;
+        if (excessAmount > 0) {
+            payable(destination).transfer(excessAmount);
+        }
+    }
+
 // Borrower functions
     function requestLoan(uint256 _amount, LoanDuration _duration) external {//modificare il fatto che possa solo essere paid
         require(_amount > 0, "The loan amount must be greater than zero");
@@ -178,6 +186,7 @@ contract LoanManager is ReentrancyGuard{
             penaltyRate: annualizedPenaltyRate,
             startDate: 0,
             dueDate: 0,
+            repayAmount: 0,
             status: LoanStatus.Pending,
             duration: _duration
         });
@@ -199,9 +208,10 @@ contract LoanManager is ReentrancyGuard{
         if (loan.status == LoanStatus.Pending) {
             loan.status = LoanStatus.Canceled;
         } else if (loan.status == LoanStatus.Paid && loan.startDate < cancelDeadline) {
-            require( loan.amount == msg.value,"");
+            require( loan.amount >= msg.value,"You haven't reached loan import");
             loan.status = LoanStatus.Canceled;
             payable(loan.lender).transfer(msg.value);
+            refundExcess(loan.amount,loan.lender);
         } else {
             revert("No loan to cancel.");
         }
@@ -222,20 +232,21 @@ contract LoanManager is ReentrancyGuard{
 
             if(block.timestamp <= loan.dueDate){
                 if(loanBorrower.creditScore <4){
-                    loanBorrower.creditScore = loanBorrower.creditScore ++;
+                    loanBorrower.creditScore += 1;
                 }
                 loan.status = LoanStatus.Paid;  
             } else if(block.timestamp > loan.dueDate){
                 if(loanBorrower.creditScore >= 1){
-                    loanBorrower.creditScore = loanBorrower.creditScore --;
+                    loanBorrower.creditScore -= 1;
                 }
                 loan.status = LoanStatus.Overdue; 
             }
-
+            loan.repayAmount = repayAmount;
             payable(loan.lender).transfer(msg.value);
+            refundExcess(repayAmount, loan.lender);
         } else revert("Insufficient funds to repay the overdue loan");
 
-        emit LoanRepaid(_loanId, loanBorrower.borrowerAddress, repayAmount, loan.status);   
+        emit LoanRepaid(_loanId, loanBorrower.borrowerAddress, loan.repayAmount, loan.status, loan.repayAmount);   
     }
    
 // Info functions
@@ -313,7 +324,7 @@ contract LoanManager is ReentrancyGuard{
 
         require(loan.loanId == _loanId, "Loan not found");
         require(loan.status == LoanStatus.Pending, "This loan doesn't need funding");
-        require(msg.value == loan.amount, "The amount sent does not match the requested loan amount");
+        require(msg.value >= loan.amount, "The amount sent does not match the requested loan amount");
         require(borrower != msg.sender, "Lender and borrower cannot be the same");
 
         uint loanDurationDays = getDaysOfLoanDuration(loan.duration);
@@ -324,6 +335,7 @@ contract LoanManager is ReentrancyGuard{
         loan.status = LoanStatus.Active;
 
         payable(borrower).transfer(msg.value);
+        refundExcess(loan.amount, loan.lender);
 
         emit LoanFunded(loan.loanId, msg.sender, borrower, msg.value, loan.startDate, loan.dueDate);
     }
