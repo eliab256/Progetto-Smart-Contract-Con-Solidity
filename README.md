@@ -29,7 +29,7 @@ This project involves a Solidity smart contract deployed on the Sepolia testnet,
 
 ## 5. Technical Choices
 
-    ### Language
+    ###Language
         -- **Solidity**: Solidity was chosen as it is the primary language for developing smart contracts on the Ethereum platform.
 
     ### Tools
