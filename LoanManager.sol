@@ -46,7 +46,7 @@ contract LoanManager is ReentrancyGuard{
         LoanDuration duration;
     }
 
-    uint256 private loanCounter;
+    uint256 private loanCounter = 0;
 
 // Mappings to track loans and borrowers
     mapping(uint256 => Loan) public loansById;  // Tracks each loan by its ID
