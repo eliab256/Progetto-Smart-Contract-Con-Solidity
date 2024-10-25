@@ -686,11 +686,11 @@
 			]
 		},
 		"LoanManager.sol": {
-			"keccak256": "0x66d63899674e789abf9cd85be153046e5bb841bed817fac8732d5714eb0457c9",
+			"keccak256": "0x91084c02cc9d0b655dad9374eeb9cda8741f3b0ea2c2f80d39eb0ac0dafd892e",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://d2dab2f4baac037e56746c98b47ebb1d4b95f0ac087a64bbf37f2616b0975dce",
-				"dweb:/ipfs/QmZHQ1adjdArr8VwXEXgyYUiRmx9FuwZZKKpEp237zfNgo"
+				"bzz-raw://e1d32a5d92d4fdacc212ccffe519dac40325a79a46c5645bfcff75c54093cb8b",
+				"dweb:/ipfs/QmfMMkg5Lj6CuCmV9kx3GfeRZ8aUyg12VKhefBweF8aSVr"
 			]
 		}
 	},
