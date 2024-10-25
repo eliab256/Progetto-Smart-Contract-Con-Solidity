@@ -1,6 +1,7 @@
 # Access to Credit: A Blockchain Solution for Low-Income Borrowers
 
-This project involves a Solidity smart contract deployed on the Sepolia testnet, designed to provide loans to low-income individuals, enabling them to enhance their financial power.
+This project involves a Solidity smart contract deployed on the Sepolia testnet, designed to provide 
+loans to low-income individuals, enabling them to enhance their financial power.
 
 ## Index
 
@@ -16,6 +17,18 @@ This project involves a Solidity smart contract deployed on the Sepolia testnet,
 
 ## 1. Description
 
+This protocol aims to provide people with limited financial resources access to credit. 
+Therefore, I could not use the classic collateralization system. The system is based on 
+the credit scores of borrowers, which will increase if the loan is repaid within the agreed 
+timeframe, providing more favorable rates. Conversely, if the loan is paid late, the credit 
+score will degrade. The contract contains all the necessary functions for data visualization,
+such as a list of all loans with their respective details, the ability for lenders to see all 
+pending loans to be funded, the option to view these loans sorted by amount or interest rate, 
+and the ability to check the status of an active loan. The practical functions allow borrowers 
+to request a loan, cancel it within the first day of receiving funds, and repay the loan with 
+interest. For lenders, in addition to the ability to view all loans, there is also the 
+opportunity to provide liquidity to these loans.
+
 ## 2. Contract Address on Sepolia
 
 ## 3. Project structure
@@ -26,6 +39,17 @@ This project involves a Solidity smart contract deployed on the Sepolia testnet,
     2. **NewsManagerLib.sol**: This file contains a support library used by the main contract to calculate interests and penalties.
 
 ## 4. Clone and Configuration
+
+    1.  **Clone the repository**:
+
+        ```bash
+        git clone https://github.com/eliab256/Progetto-Smart-Contract-Con-Solidity.git
+        ```
+    2.  **Navigate into the project directory**:
+
+        ```bash
+        cd Progetto-Smart-Contract-Con-Solidity
+        ```
 
 ## 5. Technical Choices
 
