@@ -1,0 +1,210 @@
+{
+	"compiler": {
+		"version": "0.8.0+commit.c7dfd78e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "aumentoCreditScore0",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "importo",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "tassoBase",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "giorni",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint8",
+						"name": "creditScore",
+						"type": "uint8"
+					}
+				],
+				"name": "calcolaInteressi",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "diminuzioneCreditScore2",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "diminuzioneCreditScore3",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "diminuzioneCreditScore4",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "nuovoValore",
+						"type": "uint256"
+					}
+				],
+				"name": "setAumentoCreditScore0",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "nuovoValore",
+						"type": "uint256"
+					}
+				],
+				"name": "setDiminuzioneCreditScore2",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "nuovoValore",
+						"type": "uint256"
+					}
+				],
+				"name": "setDiminuzioneCreditScore3",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "nuovoValore",
+						"type": "uint256"
+					}
+				],
+				"name": "setDiminuzioneCreditScore4",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "nuovoValore",
+						"type": "uint256"
+					}
+				],
+				"name": "setTassoInvariato",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "tassoInvariato",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"scritturatemporanea.sol": "Prestito"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"scritturatemporanea.sol": {
+			"keccak256": "0x85c1a41ff7e0e323d0fca8556f72ee869221f414ae6669d3ca84c8ca0db13245",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2f5561e19e48365ea907894178ee1d25b41d431730665d09ad41fb5f49c71334",
+				"dweb:/ipfs/Qma8EoNrf5JTV9ivoHhGYaVLaZySb9NvAQW8eZpng63AUy"
+			]
+		}
+	},
+	"version": 1
+}
