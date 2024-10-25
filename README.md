@@ -31,6 +31,8 @@ opportunity to provide liquidity to these loans.
 
 ## 2. Contract Address on Sepolia
 
+0x00f9BC9517B77501408bF0e74a6CefF747e53860
+
 ## 3. Project structure
 
     The project is divided into two main files:
