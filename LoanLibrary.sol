@@ -1,25 +1,21 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.0;
 
 library LoanLibrary{
     function interestCalculator(uint annualInterestRate, uint loanAmount, uint daysOfLoan)  internal pure returns(uint){
-        uint256 dailyInterestRate = annualInterestRate / 100 / 365;
-
-        for (uint256 i = 0; i < daysOfLoan; i++) {
-        loanAmount = loanAmount + (loanAmount * (dailyInterestRate/100));
-    }
-
-    return loanAmount; 
+        uint scalingFactor = 100000;
+       
+        loanAmount = loanAmount * (scalingFactor + ((annualInterestRate * daysOfLoan * scalingFactor)/365)) / scalingFactor ;
+    
+        return loanAmount; 
     }
 
     function penaltyCalculator(uint annualPenaltyRate, uint loanAmount, uint daysOfDelay) internal pure returns (uint) {
-        uint256 dailyPenaltyRate = annualPenaltyRate / 100 / 365;
+        uint scalingFactor = 100000;
+       
+        loanAmount = loanAmount * (scalingFactor + ((annualPenaltyRate * daysOfDelay * scalingFactor)/365)) / scalingFactor ;   
 
-        for (uint256 i = 0; i < daysOfDelay; i++) {
-        loanAmount = loanAmount + (loanAmount * (dailyPenaltyRate/100));
-    }
-
-    return loanAmount; 
+        return loanAmount; 
     }
  
 }

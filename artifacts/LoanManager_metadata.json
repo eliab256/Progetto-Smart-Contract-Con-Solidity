@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.28+commit.7893614a"
+		"version": "0.8.19+commit.7dd6d404"
 	},
 	"language": "Solidity",
 	"output": {
@@ -657,7 +657,7 @@
 		"compilationTarget": {
 			"LoanManager.sol": "LoanManager"
 		},
-		"evmVersion": "cancun",
+		"evmVersion": "paris",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
@@ -678,19 +678,19 @@
 			]
 		},
 		"LoanLibrary.sol": {
-			"keccak256": "0xf48bd292089e9c32b3cc9b8001b17ae23bc9f612805addefb4d1c6044314988b",
+			"keccak256": "0xdbba9ee8a3e7282fae630b76e5d702541e17b6ccd40bc547d512d0700ca698e1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://6b9e1746ad7f90370c6fe8caaf4f8d1d2dc0a2df6db5d836b8d0a300ede925c5",
-				"dweb:/ipfs/QmPwSb5ruqrBR6ppijYEtmGQZ6T1EzbmwrXKQqzDEHxMGV"
+				"bzz-raw://d8c0cab6d17399abae38f225f6deac34744074c805a29e6a9ba24fb5eb805468",
+				"dweb:/ipfs/Qmc7ot2aHt4Zh1V5Hmv1taFqEQsSKTbxciFHo5vhZ78sVJ"
 			]
 		},
 		"LoanManager.sol": {
-			"keccak256": "0x91084c02cc9d0b655dad9374eeb9cda8741f3b0ea2c2f80d39eb0ac0dafd892e",
+			"keccak256": "0xa773a673a60b5220b569d38d099b3c33bee2963772eb6a45e5ff61065a143b74",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://e1d32a5d92d4fdacc212ccffe519dac40325a79a46c5645bfcff75c54093cb8b",
-				"dweb:/ipfs/QmfMMkg5Lj6CuCmV9kx3GfeRZ8aUyg12VKhefBweF8aSVr"
+				"bzz-raw://55c834079425395d9b84c8fa25dcd1f507d5e16c5b82f802c497a3424d7698de",
+				"dweb:/ipfs/QmTjhnmrZ2TVZYp1ASfjNKc2YpkRemJDDu5qsynapL3y1e"
 			]
 		}
 	},

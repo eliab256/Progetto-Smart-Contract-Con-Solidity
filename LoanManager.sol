@@ -235,7 +235,7 @@ contract LoanManager is ReentrancyGuard{
                     loanBorrower.creditScore += 1;
                 }
                 loan.status = LoanStatus.Paid;  
-            } else if(block.timestamp > loan.dueDate){
+            } else {
                 if(loanBorrower.creditScore >= 1){
                     loanBorrower.creditScore -= 1;
                 }
