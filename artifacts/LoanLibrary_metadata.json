@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.28+commit.7893614a"
+		"version": "0.8.19+commit.7dd6d404"
 	},
 	"language": "Solidity",
 	"output": {
@@ -20,7 +20,7 @@
 		"compilationTarget": {
 			"LoanLibrary.sol": "LoanLibrary"
 		},
-		"evmVersion": "cancun",
+		"evmVersion": "paris",
 		"libraries": {},
 		"metadata": {
 			"bytecodeHash": "ipfs"
@@ -33,11 +33,11 @@
 	},
 	"sources": {
 		"LoanLibrary.sol": {
-			"keccak256": "0xf48bd292089e9c32b3cc9b8001b17ae23bc9f612805addefb4d1c6044314988b",
+			"keccak256": "0x361e5c4bd5a6dc8f4132389e160740a41a41b7773470685409d1d485a74611c2",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://6b9e1746ad7f90370c6fe8caaf4f8d1d2dc0a2df6db5d836b8d0a300ede925c5",
-				"dweb:/ipfs/QmPwSb5ruqrBR6ppijYEtmGQZ6T1EzbmwrXKQqzDEHxMGV"
+				"bzz-raw://a0b48ddf5f228b45622be4f5f7c90ec4cfe7367c32ad7866c65e54f09641d48f",
+				"dweb:/ipfs/QmWrNNDBhQ1kfi8XgjPDMNcBuh9hT9CahdeH2BGDicpYrL"
 			]
 		}
 	},

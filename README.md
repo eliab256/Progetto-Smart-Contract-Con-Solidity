@@ -1,6 +1,6 @@
 # Access to Credit: A Blockchain Solution for Low-Income Borrowers
 
-This project involves a Solidity smart contract deployed on the Sepolia testnet, designed to provide 
+This project involves a Solidity smart contract deployed on the Sepolia testnet, designed to provide
 loans to low-income individuals, enabling them to enhance their financial power.
 
 ## Index
@@ -14,24 +14,24 @@ loans to low-income individuals, enabling them to enhance their financial power.
     7. License
     8. Contacts
 
-
 ## 1. Description
 
-This protocol aims to provide people with limited financial resources access to credit. 
-Therefore, I could not use the classic collateralization system. The system is based on 
-the credit scores of borrowers, which will increase if the loan is repaid within the agreed 
-timeframe, providing more favorable rates. Conversely, if the loan is paid late, the credit 
+This protocol aims to provide people with limited financial resources access to credit.
+Therefore, I could not use the classic collateralization system. The system is based on
+the credit scores of borrowers, which will increase if the loan is repaid within the agreed
+timeframe, providing more favorable rates. Conversely, if the loan is paid late, the credit
 score will degrade. The contract contains all the necessary functions for data visualization,
-such as a list of all loans with their respective details, the ability for lenders to see all 
-pending loans to be funded, the option to view these loans sorted by amount or interest rate, 
-and the ability to check the status of an active loan. The practical functions allow borrowers 
-to request a loan, cancel it within the first day of receiving funds, and repay the loan with 
-interest. For lenders, in addition to the ability to view all loans, there is also the 
+such as a list of all loans with their respective details, the ability for lenders to see all
+pending loans to be funded, the option to view these loans sorted by amount or interest rate,
+and the ability to check the status of an active loan. The practical functions allow borrowers
+to request a loan, cancel it within the first day of receiving funds, and repay the loan with
+interest. For lenders, in addition to the ability to view all loans, there is also the
 opportunity to provide liquidity to these loans.
 
 ## 2. Contract Address on Sepolia
 
-0x00f9BC9517B77501408bF0e74a6CefF747e53860
+    Contract: 0x5FD6eB55D12E759a21C09eF703fe0CBa1DC9d88D
+    Library:  0xC625Dc93B7464cc414834Ccc49ee19826A2B413F
 
 ## 3. Project structure
 
@@ -70,7 +70,7 @@ opportunity to provide liquidity to these loans.
             - Search for loan details using the loan ID
             - Search for borrower details using a specific address
             - View the status of any loan at any time
-           
+
         A potential borrower can:
             - Request a loan for any desired amount, to be repaid by a predetermined deadline (1 month, 6 months, 1 year)
             - Cancel the loan if it has not been filled, or within one day of receiving the funds by returning them to the lender
@@ -82,7 +82,7 @@ opportunity to provide liquidity to these loans.
             - Filter pending loan requests by repayment deadline
             - Fund a loan request
 
-## 6. Contributing 
+## 6. Contributing
 
     Thank you for your interest in contributing to the Environmental Quiz App! Every contribution is valuable and helps improve the project. There are various ways you can contribute:
 
